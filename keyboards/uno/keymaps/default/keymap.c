@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include <string.h>
 
 enum uno_keycode
 {
@@ -42,8 +43,6 @@ uint8_t menuCounter = 0;
 #define CUSTOM_LONGPRESS 200
 #define CUSTOM_LONGERPRESS 1000
 #define CUSTOM_STRING "fuck did you just fucking say about me, you little bitch? I'll have you know I graduated top of my class in the Navy Seals, and I've been involved in numerous secret raids on Al-Quaeda, and I have over 300 confirmed kills. I am trained in gorilla warfare and I'm the top sniper in the entire US armed forces. You are nothing to me but just another target. I will wipe you the fuck out with precision the likes of which has never been seen before on this Earth, mark my fucking words. You think you can get away with saying that shit to me over the Internet? Think again, fucker. As we speak I am contacting my secret network of spies across the USA and your IP is being traced right now so you better prepare for the storm, maggot. The storm that wipes out the pathetic little thing you call your life. You're fucking dead, kid. I can be anywhere, anytime, and I can kill you in over seven hundred ways, and that's just with my bare hands. Not only am I extensively trained in unarmed combat, but I have access to the entire arsenal of the United States Marine Corps and I will use it to its full extent to wipe your miserable ass off the face of the continent, you little shit. If only you could have known what unholy retribution your little “clever” comment was about to bring down upon you, maybe you would have held your fucking tongue. But you couldn't, you didn't, and now you're paying the price, you goddamn idiot. I will shit fury all over you and you will drown in it. You're fucking dead, kiddo."
-char minLetter = 'a';
-char maxLetter = 'z';
 uint8_t presetCounter = 0;
 
 // Morse
@@ -54,6 +53,14 @@ static uint16_t releaseTimer = 0xFFFF;
 #define MORSE_MAX_INPUT 6
 uint16_t timeSinceLast = 0;
 uint8_t morseHistory[MORSE_MAX_INPUT] = {0};
+
+// Lovey Dovey
+char ch_arr[3][10] = {
+    "spike",
+    "tom",
+    "jerry"
+};
+char sendingThis[256] = "asdfesafdsafeslisjldkfjaslijf";
 
 // Lights
 const uint8_t PROGMEM RGBLED_RAINBOW_MOOD_INTERVALS[] = { 10, 25, 50 };
@@ -85,7 +92,7 @@ bool intro(void) {
             return true;
             break;
         case 2:
-            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"Korte tap voor letterselectie, iets langer voor de volgende letter."SS_TAP(X_ENTER)"1s als je boos bent, 3s voor het menu.");
+            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"Korte tap voor letterselectie, iets langer voor de volgende letter."SS_TAP(X_ENTER)"Hou de toets 1 seconde in als je boos bent,"SS_TAP(X_ENTER)"3 seconden voor het menu.");
             presetCounter++;
             return true;
             break;
@@ -108,10 +115,10 @@ void show_menu(void) {
     SEND_STRING("notepad"SS_TAP(X_ENTER));
     _delay_ms(250);
     SEND_STRING("Keuzemenu met de volgende smaken:"SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 1x om te schakelen naar toetsenbord."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 2x om te schakelen naar morse."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 3x om te schakelen naar complimentjes-modus."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 4x om de verlichting in te stellen."SS_TAP(X_ENTER));
+    SEND_STRING("  - Tik 1x kort om te schakelen naar toetsenbord."SS_TAP(X_ENTER));
+    SEND_STRING("  - Tik 2x kort om te schakelen naar morse."SS_TAP(X_ENTER));
+    SEND_STRING("  - Tik 3x kort om te schakelen naar extra lieve modus."SS_TAP(X_ENTER));
+    SEND_STRING("  - Tik 4x kort om de verlichting in te stellen."SS_TAP(X_ENTER));
     SEND_STRING("Bevestig je keuze door de knop 1s in te drukken"SS_TAP(X_ENTER));
     menuCounter = 0;
     mode = MODE_MENU;
@@ -197,11 +204,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                             } else {
                                 SEND_STRING(SS_TAP(X_BSPACE));
                             }
-                            if (stringToSend[0] < maxLetter && stringToSend[0] >= minLetter) {
+                            if (stringToSend[0] != 'z' && stringToSend[0] != ' ' && stringToSend[0] != '9' && stringToSend[0] != 'Z' && stringToSend[0] != '/' && stringToSend[0] != '@' && stringToSend[0] != '\0') {
                                 stringToSend[0]++;
-                            } else if (stringToSend[0] == maxLetter) {
+                            } else if (stringToSend[0] == 'z') {
+                                stringToSend[0] = '0';
+                            } else if (stringToSend[0] == '9') {
+                                stringToSend[0] = 'A';
+                            } else if (stringToSend[0] == 'Z') {
+                                stringToSend[0] = '!';
+                            } else if (stringToSend[0] == '/') {
+                                stringToSend[0] = ':';
+                            } else if (stringToSend[0] == '@') {
                                 stringToSend[0] = ' ';
-                            } else if (stringToSend[0] == ' ' || stringToSend[0] == '\0') {
+                            } else if (stringToSend[0] == '\0') {
+                                stringToSend[0] = ' ';
+                            } else if (stringToSend[0] == ' ') {
                                 stringToSend[0] = 'a';
                             }
                             send_string(stringToSend);
@@ -538,8 +555,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                         send_string(stringToSend);
                         break;
                     case MODE_COMPLIMENTS:
-                        mode = MODE_KEYBOARD;
-                        SEND_STRING("TBA" SS_TAP(X_ENTER));
+                        if (timeElapsed < MENU_LENGTH) {
+                            // Normal press
+                            strcpy(sendingThis, ch_arr[0]);
+                            send_string(sendingThis);
+                        } else if (timeElapsed < RESET_LENGTH) {
+                            // Enter menu
+                            show_menu();
+                        } else {
+                            reset_keyboard();
+                        }
                         break;
                     case MODE_LIGHTS:
                         mode = MODE_KEYBOARD;
