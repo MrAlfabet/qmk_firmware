@@ -1,4 +1,5 @@
-/* Copyright 2020 Snipeye
+/* Copyright 2020 MrAlfabet
+ * Based on Snipeye's keymap
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,35 +58,35 @@ uint8_t morseHistory[MORSE_MAX_INPUT] = {0};
 // Lovey Dovey
 #include <stdlib.h> // for randomness
 #define STRING_LENGTH 51 // 50 + terminator
-#define NUM_LOVE 25
-char loveDatabase[NUM_LOVE][STRING_LENGTH] = { //      | <- blijf voor deze lijn
-    "Jij bent mijn lief meisje!",
-    "Hi lekkerding!",
-    "Hai lekkerding... Ik hou van jou!",
-    "Knappe contractmanager van me!",
-    "Ik hou zo ontzettend veel van jou!",
-    "Knuffel!",
-    "Lekker chickie van me!",
-    "*Knuffel - kneepje in je bil - knuffel*",
-    "Ik ben zo ontzettend trots op jou!",
-    "Hey hot stuff! You can do it!",
-    "Mooi meisje.... Zoen!",
-    "Jij bent mijn Godin.",
-    "Samen komen we er altijd uit liefie!",
-    "Lief knorretje van me ;)",
-    "Dit is 15",
-    "Dit is 16",
-    "Dit is 17",
-    "Dit is 18",
-    "Dit is 19",
-    "Dit is 20",
-    "Dit is 21",
-    "Dit is 22",
-    "Dit is 23",
-    "Dit is 24",
-    "Dit is 25"
+#define NUM_STRING 25
+char stringDatabase[NUM_STRING][STRING_LENGTH] = { //      | <- stay ahead of this line (50 char)
+    "String 1",
+    "String 2",
+    "String 3",
+    "String 4",
+    "String 5",
+    "String 6",
+    "String 7",
+    "String 8",
+    "String 9",
+    "String 10",
+    "String 11",
+    "String 12",
+    "String 13",
+    "String 14",
+    "String 15",
+    "String 16",
+    "String 17",
+    "String 18",
+    "String 19",
+    "String 20",
+    "String 21",
+    "String 22",
+    "String 23",
+    "String 24",
+    "String 25"
 };
-char chosenLovelyness[STRING_LENGTH] = "";
+char chosenString[STRING_LENGTH] = "";
 int r = 0;      // r = rand() Returns a pseudo-random integer between 0 and RAND_MAX.
 
 // Lights
@@ -106,19 +107,19 @@ bool intro(void) {
             _delay_ms(500);
             SEND_STRING("notepad"SS_TAP(X_ENTER));
             _delay_ms(500);
-            SEND_STRING("Hi Lieffie! Hele fijne verjaardag!");
+            SEND_STRING("Hi there!");
             presetCounter++;
             return true;
             break;
         case 1:
-            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"Van mij, voor jou; een feel-good cadeautje met mood-verlichting ;)");
+            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"We can do lighting ;)");
             rgblight_sethsv_noeeprom(255, 255, 255);
             rgblight_mode_noeeprom(RGBLIGHT_MODE_RAINBOW_MOOD);
             presetCounter++;
             return true;
             break;
         case 2:
-            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"Korte tap voor letterselectie, iets langer voor de volgende letter."SS_TAP(X_ENTER)"Hou de toets 1 seconde in als je boos bent,"SS_TAP(X_ENTER)"3 seconden voor het menu.");
+            SEND_STRING(SS_TAP(X_ENTER)SS_TAP(X_ENTER)"Short press for letter selection, long press for next letter."SS_TAP(X_ENTER)"Press 1 second and release for string macro,"SS_TAP(X_ENTER)"3 seconds for the menu.");
             presetCounter++;
             return true;
             break;
@@ -140,12 +141,12 @@ void show_menu(void) {
     _delay_ms(250);
     SEND_STRING("notepad"SS_TAP(X_ENTER));
     _delay_ms(250);
-    SEND_STRING("Keuzemenu met de volgende smaken:"SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 1x kort om te schakelen naar toetsenbord."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 2x kort om te schakelen naar morse."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 3x kort om te schakelen naar extra lieve modus."SS_TAP(X_ENTER));
-    SEND_STRING("  - Tik 4x kort om de verlichting in te stellen."SS_TAP(X_ENTER));
-    SEND_STRING("Bevestig je keuze door de knop 1s in te drukken"SS_TAP(X_ENTER));
+    SEND_STRING("Menu:"SS_TAP(X_ENTER));
+    SEND_STRING("  - 1 short tap for keyboard."SS_TAP(X_ENTER));
+    SEND_STRING("  - 2 short taps for morse."SS_TAP(X_ENTER));
+    SEND_STRING("  - 3 short taps for random string macro."SS_TAP(X_ENTER));
+    SEND_STRING("  - 4 short taps for lighting settings."SS_TAP(X_ENTER));
+    SEND_STRING("Confirm your choice by pressing the button for =>1 sec and releasing."SS_TAP(X_ENTER));
     menuCounter = 0;
     mode = MODE_MENU;
     stringToSend[0] = '\0';
@@ -214,7 +215,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                                 rgblight_mode_noeeprom(RGBLIGHT_MODE_RAINBOW_MOOD);
                                 firstTime = true;
                             } else {
-                                SEND_STRING("Daar ging iets fout... try again!" SS_TAP(X_ENTER));
+                                SEND_STRING("Something went wrong there... try again!" SS_TAP(X_ENTER));
                                 menuCounter = 0;
                             }
                         }
@@ -583,9 +584,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     case MODE_COMPLIMENTS:
                         if (timeElapsed < MENU_LENGTH) {
                             // Normal press
-                            r = rand() % NUM_LOVE;
-                            strcpy(chosenLovelyness, loveDatabase[r]);
-                            send_string(chosenLovelyness);
+                            r = rand() % NUM_STRING
+                        ;
+                            strcpy(chosenString, stringDatabase
+                        [r]);
+                            send_string(chosenString);
                             SEND_STRING(SS_TAP(X_ENTER) SS_TAP(X_ENTER));
                         } else if (timeElapsed < RESET_LENGTH) {
                             // Enter menu
