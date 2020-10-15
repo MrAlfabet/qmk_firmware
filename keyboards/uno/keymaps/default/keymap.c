@@ -55,12 +55,38 @@ uint16_t timeSinceLast = 0;
 uint8_t morseHistory[MORSE_MAX_INPUT] = {0};
 
 // Lovey Dovey
-char ch_arr[3][10] = {
-    "spike",
-    "tom",
-    "jerry"
+#include <stdlib.h> // for randomness
+#define STRING_LENGTH 51 // 50 + terminator
+#define NUM_LOVE 25
+char loveDatabase[NUM_LOVE][STRING_LENGTH] = { //      | <- blijf voor deze lijn
+    "Jij bent mijn lief meisje!",
+    "Hi lekkerding!",
+    "Hai lekkerding... Ik hou van jou!",
+    "Knappe contractmanager van me!",
+    "Ik hou zo ontzettend veel van jou!",
+    "Knuffel!",
+    "Lekker chickie van me!",
+    "*Knuffel - kneepje in je bil - knuffel*",
+    "Ik ben zo ontzettend trots op jou!",
+    "Hey hot stuff! You can do it!",
+    "Mooi meisje.... Zoen!",
+    "Jij bent mijn Godin.",
+    "Samen komen we er altijd uit liefie!",
+    "Lief knorretje van me ;)",
+    "Dit is 15",
+    "Dit is 16",
+    "Dit is 17",
+    "Dit is 18",
+    "Dit is 19",
+    "Dit is 20",
+    "Dit is 21",
+    "Dit is 22",
+    "Dit is 23",
+    "Dit is 24",
+    "Dit is 25"
 };
-char sendingThis[256] = "asdfesafdsafeslisjldkfjaslijf";
+char chosenLovelyness[STRING_LENGTH] = "";
+int r = 0;      // r = rand() Returns a pseudo-random integer between 0 and RAND_MAX.
 
 // Lights
 const uint8_t PROGMEM RGBLED_RAINBOW_MOOD_INTERVALS[] = { 10, 25, 50 };
@@ -557,8 +583,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     case MODE_COMPLIMENTS:
                         if (timeElapsed < MENU_LENGTH) {
                             // Normal press
-                            strcpy(sendingThis, ch_arr[0]);
-                            send_string(sendingThis);
+                            r = rand() % NUM_LOVE;
+                            strcpy(chosenLovelyness, loveDatabase[r]);
+                            send_string(chosenLovelyness);
+                            SEND_STRING(SS_TAP(X_ENTER) SS_TAP(X_ENTER));
                         } else if (timeElapsed < RESET_LENGTH) {
                             // Enter menu
                             show_menu();
